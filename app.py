@@ -46,6 +46,21 @@ st.set_page_config(
 load_dotenv()
 init_session_state()
 
+# Auto initialize Gemini from Streamlit Secrets
+try:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+
+    st.session_state.api_key = api_key
+    st.session_state.api_key_validated = True
+
+    if "generator" not in st.session_state:
+        st.session_state.generator = SocialContentGenerator(
+            api_key=api_key
+        )
+
+except Exception:
+    st.session_state.api_key_validated = False
+
 # ── Inject CSS ─────────────────────────────────────────────────────────────────
 st.markdown(DARK_FUTURISTIC_CSS, unsafe_allow_html=True)
 st.markdown(render_header(), unsafe_allow_html=True)
@@ -60,27 +75,7 @@ with st.sidebar:
         '<p class="sidebar-section-label">⚙ Configuration</p>',
         unsafe_allow_html=True,
     )
-    # API Key input
-    api_key_input = st.text_input(
-        "Google Gemini API Key",
-        type="password",
-        placeholder="AIza...",
-        value=st.session_state.api_key or os.getenv("GOOGLE_API_KEY", ""),
-        help="Get your key at aistudio.google.com/app/apikey",
-    )    
-
-
-    if api_key_input and api_key_input != st.session_state.api_key:
-        with st.spinner("Validating key..."):
-            if validate_api_key(api_key_input):
-                st.session_state.api_key = api_key_input
-                st.session_state.api_key_validated = True
-                st.session_state.generator = SocialContentGenerator(api_key=api_key_input)
-                st.success("✓ Connected to Gemini")
-            else:
-                st.error("✗ Invalid API key")
-                st.session_state.api_key_validated = False
-
+  
     if st.session_state.api_key_validated:
         st.markdown(
             '<span class="status-dot"></span>&nbsp; <span style="font-size:0.75rem;color:#8896b3;">Gemini API active</span>',
