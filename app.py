@@ -283,7 +283,7 @@ with tab_hooks:
 
         hook_btn = st.button(
             "🪝 Generate Hooks",
-            disabled=not st.session_state.api_key_validated,
+            disabled=False,
         )
 
     with h_col2:
@@ -340,7 +340,7 @@ with tab_repurpose:
 
         repurpose_btn = st.button(
             "🔄 Repurpose Content",
-            disabled=not st.session_state.api_key_validated,
+            disabled=False,
         )
 
     with r_col2:
