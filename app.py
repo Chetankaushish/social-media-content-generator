@@ -61,14 +61,6 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # API Key input
-    api_key_input = st.text_input(
-        "Google Gemini API Key",
-        type="password",
-        placeholder="AIza...",
-        value=st.session_state.api_key or os.getenv("GOOGLE_API_KEY", ""),
-        help="Get your key at aistudio.google.com/app/apikey",
-    )
 
     if api_key_input and api_key_input != st.session_state.api_key:
         with st.spinner("Validating key..."):
