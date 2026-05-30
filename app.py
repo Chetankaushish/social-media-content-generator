@@ -45,13 +45,20 @@ st.set_page_config(
 load_dotenv()
 init_session_state()
 
-# ── Auto-initialize generator from environment variable ────────────────────────
-if not st.session_state.api_key_validated:
-    _env_key = os.getenv("GOOGLE_API_KEY", "")
-    if _env_key:
-        st.session_state.api_key = _env_key
-        st.session_state.api_key_validated = True
-        st.session_state.generator = SocialContentGenerator(api_key=_env_key)
+# Auto-initialize generator from Streamlit Secrets
+try:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+
+    st.session_state.api_key = api_key
+    st.session_state.api_key_validated = True
+
+    if "generator" not in st.session_state:
+        st.session_state.generator = SocialContentGenerator(
+            api_key=api_key
+        )
+
+except Exception:
+    st.session_state.api_key_validated = False
 
 # ── Inject CSS ─────────────────────────────────────────────────────────────────
 st.markdown(DARK_FUTURISTIC_CSS, unsafe_allow_html=True)
@@ -68,15 +75,10 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # Show API connection status (key loaded from .env, not user-input)
-    if st.session_state.api_key_validated:
-        st.markdown(
-            '<span class="status-dot"></span>&nbsp; <span style="font-size:0.75rem;color:#8896b3;">Gemini API active</span>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.error("⚠ GOOGLE_API_KEY not found.\nAdd it to your .env file and restart.")
-        st.caption("Get your key at [aistudio.google.com](https://aistudio.google.com/app/apikey)")
+if st.session_state.api_key_validated:
+    st.success("✅ Gemini Connected")
+else:
+    st.warning("⚠ Gemini API not configured")
 
     st.divider()
 
