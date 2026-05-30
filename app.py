@@ -186,8 +186,8 @@ with tab_generate:
                 use_container_width=True,
             )
 
-        if not st.session_state.api_key_validated:
-            st.caption("⚠ Add your API key in the sidebar to start generating.")
+       # if not st.session_state.api_key_validated:
+        #    st.caption("⚠ Add your API key in the sidebar to start generating.")
 
     with col_right:
         st.markdown(render_section_header("Output"), unsafe_allow_html=True)
