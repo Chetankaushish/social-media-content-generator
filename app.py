@@ -184,7 +184,6 @@ with tab_generate:
             generate_clicked = st.button(
                 f"⚡ Generate {num_variations} Variations",
                 use_container_width=True,
-                disabled=not st.session_state.api_key_validated,
             )
 
         if not st.session_state.api_key_validated:
