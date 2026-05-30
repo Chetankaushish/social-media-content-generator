@@ -15,7 +15,6 @@ from utils.generator import (
     TONES,
     CONTENT_TYPES,
     get_char_status,
-    validate_api_key,
 )
 from utils.styles import (
     DARK_FUTURISTIC_CSS,
@@ -46,6 +45,14 @@ st.set_page_config(
 load_dotenv()
 init_session_state()
 
+# ── Auto-initialize generator from environment variable ────────────────────────
+if not st.session_state.api_key_validated:
+    _env_key = os.getenv("GOOGLE_API_KEY", "")
+    if _env_key:
+        st.session_state.api_key = _env_key
+        st.session_state.api_key_validated = True
+        st.session_state.generator = SocialContentGenerator(api_key=_env_key)
+
 # ── Inject CSS ─────────────────────────────────────────────────────────────────
 st.markdown(DARK_FUTURISTIC_CSS, unsafe_allow_html=True)
 st.markdown(render_header(), unsafe_allow_html=True)
@@ -61,31 +68,15 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # API Key input
-    api_key_input = st.text_input(
-        "Google Gemini API Key",
-        type="password",
-        placeholder="AIza...",
-        value=st.session_state.api_key or os.getenv("GOOGLE_API_KEY", ""),
-        help="Get your key at aistudio.google.com/app/apikey",
-    )
-
-    if api_key_input and api_key_input != st.session_state.api_key:
-        with st.spinner("Validating key..."):
-            if validate_api_key(api_key_input):
-                st.session_state.api_key = api_key_input
-                st.session_state.api_key_validated = True
-                st.session_state.generator = SocialContentGenerator(api_key=api_key_input)
-                st.success("✓ Connected to Gemini")
-            else:
-                st.error("✗ Invalid API key")
-                st.session_state.api_key_validated = False
-
+    # Show API connection status (key loaded from .env, not user-input)
     if st.session_state.api_key_validated:
         st.markdown(
             '<span class="status-dot"></span>&nbsp; <span style="font-size:0.75rem;color:#8896b3;">Gemini API active</span>',
             unsafe_allow_html=True,
         )
+    else:
+        st.error("⚠ GOOGLE_API_KEY not found.\nAdd it to your .env file and restart.")
+        st.caption("Get your key at [aistudio.google.com](https://aistudio.google.com/app/apikey)")
 
     st.divider()
 
@@ -189,11 +180,7 @@ with tab_generate:
             generate_clicked = st.button(
                 f"⚡ Generate {num_variations} Variations",
                 use_container_width=True,
-                disabled=not st.session_state.api_key_validated,
             )
-
-        if not st.session_state.api_key_validated:
-            st.caption("⚠ Add your API key in the sidebar to start generating.")
 
     with col_right:
         st.markdown(render_section_header("Output"), unsafe_allow_html=True)
@@ -287,10 +274,7 @@ with tab_hooks:
         hook_tone = st.selectbox("Tone", TONES, key="hook_tone")
         hook_platform = st.selectbox("Platform", list(PLATFORM_CONFIGS.keys()), key="hook_platform")
 
-        hook_btn = st.button(
-            "🪝 Generate Hooks",
-            disabled=not st.session_state.api_key_validated,
-        )
+        hook_btn = st.button("🪝 Generate Hooks")
 
     with h_col2:
         if hook_btn:
@@ -344,10 +328,7 @@ with tab_repurpose:
         with rc2:
             target_platform = st.selectbox("To Platform", list(PLATFORM_CONFIGS.keys()), index=1, key="tgt_platform")
 
-        repurpose_btn = st.button(
-            "🔄 Repurpose Content",
-            disabled=not st.session_state.api_key_validated,
-        )
+        repurpose_btn = st.button("🔄 Repurpose Content")
 
     with r_col2:
         if repurpose_btn:
