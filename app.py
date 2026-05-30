@@ -1,6 +1,6 @@
 """
 ContentForge AI — Social Media Content Generator
-Built with Streamlit + LangChain + Anthropic Claude
+Built with Streamlit + LangChain + Google Gemini AI
 
 Run: streamlit run app.py
 """
